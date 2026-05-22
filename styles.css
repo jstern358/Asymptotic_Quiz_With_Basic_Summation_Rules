@@ -204,15 +204,8 @@ select {
   transition: background 0.2s ease;
 }
 
-.answer-btn:hover:enabled {
-  background: #d1d5db;
-}
-
-.answer-btn:disabled {
-  cursor: default;
-  opacity: 1;
-}
-
+.answer-btn:hover:enabled { background: #d1d5db; }
+.answer-btn:disabled { cursor: default; opacity: 1; }
 .correct { background: #16a34a !important; color: white; }
 .wrong { background: #dc2626 !important; color: white; }
 .missed-correct { background: #15803d !important; color: white; }
@@ -296,6 +289,10 @@ select {
   border-radius: 8px;
   padding: 10px 12px;
   margin-bottom: 10px;
+}
+
+.math-inline {
+  font-family: "Courier New", monospace;
 }
 
 .muted { color: #6b7280; }

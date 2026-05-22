@@ -1,12 +1,18 @@
-# Asymptotic Runtime Trainer (Fixed Working Version)
+# Asymptotic Runtime Trainer
 
-Files:
+## Files
 - index.html
 - styles.css
 - questions.js
 - app.js
 
-## Notes
-- This version restores the full 4-file structure and working UI.
-- It includes level selection, multiple-choice answers, next-question behavior, code block display, summary tables, and step-by-step explanations.
-- Upload all 4 files to the root of your GitHub Pages repository.
+## New in this version
+- More variety across levels
+- Independent double nested loops
+- Sequential sections with additive runtime relationships
+- New solution step: **Simplify the sum**
+- Shifted/scaled polynomial summations based on lecture-slide style simplification rules
+- Higher levels (up to 5)
+
+## Deployment
+Upload all files to the root of your GitHub Pages repository, commit, wait for deployment, then hard refresh.

@@ -4,7 +4,7 @@
     current: null,
     answered: false,
     deckByLevel: {},
-    recentNamesByLevel: { 1: [], 2: [], 3: [], 4: [] }
+    recentNamesByLevel: { 1: [], 2: [], 3: [], 4: [], 5: [] }
   };
 
   function shuffle(arr) {
@@ -47,8 +47,8 @@
 
     for (let i = 0; i < deck.length; i++) {
       const factory = templates[deck[i]];
-      const name = factory.name || ('template_' + deck[i]);
-      if (!recent.includes(name) || deck.length === 1) {
+      const familyName = factory.name || ('template_' + deck[i]);
+      if (!recent.includes(familyName) || deck.length === 1) {
         chosenDeckIndex = i;
         break;
       }
@@ -120,7 +120,7 @@
     const answersDiv = document.getElementById('answers');
     answersDiv.innerHTML = '';
 
-    shuffle(question.choices).forEach(choice => {
+    question.choices.forEach(choice => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn';
       btn.innerHTML = choice;
@@ -172,7 +172,7 @@
     const e = question.explanation;
     return `
       <h3>Step-by-Step Explanation</h3>
-      <h4>Summary</h4>
+      <h4>Summary Table</h4>
       ${renderSummaryTable(e.blockSummaries)}
       ${renderSteps(e)}
       <div class="step"><h4>Final Answer</h4><div>${e.finalRuntime}</div></div>
