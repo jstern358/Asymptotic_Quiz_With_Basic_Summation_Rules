@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Asymptotic Analysis Quiz</title>
+<style>
+  body {
+    font-family: Arial;
+    background: #f4f6f9;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 750px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+  }
+
+  pre {
+    background: #1e1e1e;
+    color: #00ff88;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #e1e7ef;
+    font-size: 16px;
+  }
+
+  button:hover { background: #cfd8e3; }
+
+  .correct { background: #4CAF50 !important; color: white; }
+  .wrong { background: #e74c3c !important; color: white; }
+
+  #feedback { margin-top: 10px; font-size: 18px; }
+  #explanation {
+    margin-top: 20px;
+    text-align: left;
+    background: #f9fafc;
+    padding: 15px;
+    border-radius: 8px;
+    display: none;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Asymptotic Runtime Trainer</h2>
+
+  <pre id="code"></pre>
+
+  <div id="answers"></div>
+
+  <div id="feedback"></div>
+
+  <div id="explanation"></div>
+</div>
+
+<script>
+function shuffle(arr){ return arr.sort(() => Math.random() - 0.5); }
+
+// ---------- QUESTION TYPES ----------
+
+function triangularLoop() {
+  return {
+    code: `for i = 1 to n:
+    for j = 1 to i:
+        do O(1) work`,
+    answer: "Θ(n^2)",
+    choices: ["Θ(n)", "Θ(n^2)", "Θ(n log n)", "Θ(log n)"],
+    explanation: `
+<b>Step 1: Identify structure</b><br>
+Nested loops → multiply costs.<br><br>
+
+<b>Step 2: Inner loop cost</b><br>
+For fixed i:<br>
+j runs from 1 to i → Θ(i)<br><br>
+
+<b>Step 3: Convert to summation</b><br>
+Total work = Σ (i=1 → n) Θ(i)<br><br>
+
+<b>Step 4: Evaluate summation</b><br>
+Σ i = n(n+1)/2 = Θ(n²)<br><br>
+
+<b>Step 5: Classification</b><br>
+Polynomial summation (linear term summed) → Θ(n²)<br>
+`
+  };
+}
+
+function quadraticInner() {
+  return {
+    code: `for i = 1 to n:
+    for j = 1 to i^2:
+        do O(1) work`,
+    answer: "Θ(n^3)",
+    choices: ["Θ(n^2)", "Θ(n^3)", "Θ(n log n)", "Θ(n^4)"],
+    explanation: `
+<b>Step 1: Structure</b><br>
+Nested loops → multiply costs.<br><br>
+
+<b>Step 2: Inner loop</b><br>
+For fixed i: cost = Θ(i²)<br><br>
+
+<b>Step 3: Summation</b><br>
+Total = Σ i² (i=1 → n)<br><br>
+
+<b>Step 4: Evaluate</b><br>
+Σ i² = n(n+1)(2n+1)/6 = Θ(n³)<br><br>
+
+<b>Step 5: Classification</b><br>
+Polynomial summation (degree 2) → Θ(n³)<br>
+`
+  };
+}
+
+function logLoop() {
+  return {
+    code: `i = 1
+while i ≤ n:
+    do O(1)
+    i = 2i`,
+    answer: "Θ(log n)",
+    choices: ["Θ(n)", "Θ(log n)", "Θ(n log n)", "Θ(1)"],
+    explanation: `
+<b>Step 1: Growth pattern</b><br>
+i doubles each iteration.<br><br>
+
+<b>Step 2: Iteration count</b><br>
+Solve: 2^k ≈ n → k = log n<br><br>
+
+<b>Step 3: Cost</b><br>
+Each iteration costs Θ(1)<br><br>
+
+<b>Step 4: Total</b><br>
+Θ(log n)<br><br>
+
+<b>Step 5: Classification</b><br>
+Exponentially increasing index → logarithmic runtime.<br>
+`
+  };
+}
+
+function geometricInner() {
+  return {
+    code: `for i = 1 to n:
+    j = 1
+    while j ≤ i:
+        do O(1)
+        j = 2j`,
+    answer: "Θ(n log n)",
+    choices: ["Θ(n)", "Θ(log n)", "Θ(n log n)", "Θ(n^2)"],
+    explanation: `
+<b>Step 1: Structure</b><br>
+Outer loop (n iterations), inner loop logarithmic.<br><br>
+
+<b>Step 2: Inner loop</b><br>
+j doubles → Θ(log i)<br><br>
+
+<b>Step 3: Summation</b><br>
+Total = Σ log i (i=1 → n)<br><br>
+
+<b>Step 4: Evaluate</b><br>
+Σ log i = Θ(n log n)<br><br>
+
+<b>Step 5: Classification</b><br>
+Logarithmic summation → Θ(n log n)<br>
+`
+  };
+}
+
+function mixedSequential() {
+  return {
+    code: `for i = 1 to n:
+    do O(1)
+
+for i = 1 to n:
+    for j = 1 to i:
+        do O(1)`,
+    answer: "Θ(n^2)",
+    choices: ["Θ(n)", "Θ(n^2)", "Θ(n log n)", "Θ(n^3)"],
+    explanation: `
+<b>Step 1: Structure</b><br>
+Two blocks run sequentially → ADD runtimes.<br><br>
+
+<b>Step 2: First loop</b><br>
+Θ(n)<br><br>
+
+<b>Step 3: Second block</b><br>
+Triangular loop → Θ(n²)<br><br>
+
+<b>Step 4: Combine</b><br>
+Θ(n) + Θ(n²) = Θ(n²) (dominated by largest term)<br><br>
+
+<b>Key Rule</b><br>
+Sequential → ADD<br>
+Nested → MULTIPLY<br>
+`
+  };
+}
+
+const generators = [
+  triangularLoop,
+  quadraticInner,
+  logLoop,
+  geometricInner,
+  mixedSequential
+];
+
+let current;
+
+// ---------- UI ----------
+
+function newQuestion() {
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("explanation").style.display = "none";
+
+  current = generators[Math.floor(Math.random()*generators.length)]();
+
+  document.getElementById("code").innerText = current.code;
+
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  const choices = shuffle([...current.choices]);
+
+  choices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.innerText = choice;
+
+    btn.onclick = () => {
+      if (choice === current.answer) {
+        btn.classList.add("correct");
+        document.getElementById("feedback").innerText = "✅ Correct!";
+      } else {
+        btn.classList.add("wrong");
+        document.getElementById("feedback").innerText =
+          "❌ Incorrect! Answer: " + current.answer;
+      }
+
+      const exp = document.getElementById("explanation");
+      exp.innerHTML = current.explanation;
+      exp.style.display = "block";
+
+      setTimeout(newQuestion, 4500);
+    };
+
+    answersDiv.appendChild(btn);
+  });
+}
+
+newQuestion();
+</script>
+
+</body>
+</html>
