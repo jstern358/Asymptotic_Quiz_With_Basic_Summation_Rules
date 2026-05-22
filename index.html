@@ -8,26 +8,865 @@
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f9;
-      text-align: center;
-      padding: 20px;
       color: #1f2937;
+      margin: 0;
+      padding: 20px;
     }
 
     .container {
-      max-width: 1050px;
-      margin: auto;
+      max-width: 1100px;
+      margin: 0 auto;
       background: white;
-      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+      padding: 24px;
     }
 
-    h2 {
+    h1 {
       margin-top: 0;
-      margin-bottom: 8px;
+      text-align: center;
     }
 
     .subtitle {
-      margin-top: 0;
-      margin-bottom: 18px;
+      text-align: center;
       color: #4b5563;
+      margin-bottom: 22px;
+    }
+
+    .question-area {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .code-card, .analysis-card, .feedback-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    /* ---------- CODE RENDERING ---------- */
+
+    .code-wrapper {
+      position: relative;
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 16px 16px 16px 90px;
+      overflow-x: auto;
+      min-height: 220px;
+    }
+
+    .code-lines {
+      position: relative;
+      z-index: 2;
+      font-family: "Courier New", monospace;
+      color: #00ff88;
+      font-size: 16px;
+      line-height: 28px;
+      white-space: pre;
+    }
+
+    .code-line {
+      height: 28px;
+      display: flex;
+      align-items: center;
+    }
+
+    .line-no {
+      width: 42px;
+      color: #93c5fd;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .code-text {
+      white-space: pre;
+    }
+
+    .bracket-layer {
+      position: absolute;
+      left: 10px;
+      top: 16px;
+      width: 70px;
+      height: calc(100% - 32px);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .block-bracket {
+      position: absolute;
+      left: 18px;
+      width: 16px;
+      border-left: 4px solid;
+      border-radius: 3px;
+    }
+
+    .block-bracket::before,
+    .block-bracket::after {
+      content: "";
+      position: absolute;
+      left: -1px;
+      width: 14px;
+      border-top: 4px solid;
+    }
+
+    .block-bracket::before {
+      top: 0;
+    }
+
+    .block-bracket::after {
+      bottom: 0;
+    }
+
+    .block-label {
+      position: absolute;
+      left: 26px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      background: rgba(255,255,255,0.95);
+      color: #111827;
+      border-radius: 6px;
+      padding: 2px 6px;
+      border: 1px solid #d1d5db;
+      white-space: nowrap;
+    }
+
+    /* ---------- ANSWERS ---------- */
+
+    #answers {
+      margin-top: 10px;
+    }
+
+    .answer-btn {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #e5e7eb;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .answer-btn:hover:enabled {
+      background: #d1d5db;
+    }
+
+    .answer-btn:disabled {
+      cursor: default;
+      opacity: 1;
+    }
+
+    .correct {
+      background: #16a34a !important;
+      color: white;
+    }
+
+    .wrong {
+      background: #dc2626 !important;
+      color: white;
+    }
+
+    .missed-correct {
+      background: #15803d !important;
+      color: white;
+    }
+
+    /* ---------- FEEDBACK / EXPLANATION ---------- */
+
+    #feedback {
+      font-size: 18px;
+      font-weight: bold;
+      min-height: 28px;
+      margin-bottom: 12px;
+    }
+
+    #nextBtn {
+      display: none;
+      padding: 12px 22px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    #nextBtn:hover {
+      background: #1d4ed8;
+    }
+
+    #explanation {
+      display: none;
+      margin-top: 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+      line-height: 1.6;
+    }
+
+    #explanation h3 {
+      margin-top: 0;
+    }
+
+    #explanation h4 {
+      margin-bottom: 6px;
+      margin-top: 18px;
+    }
+
+    .block-summary {
+      border: 1px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .math-box {
+      background: #eef2ff;
+      border-left: 4px solid #6366f1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: "Courier New", monospace;
+      white-space: pre-wrap;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .rule-box {
+      background: #ecfeff;
+      border-left: 4px solid #0891b2;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .type-box {
+      background: #fff7ed;
+      border-left: 4px solid #ea580c;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .final-box {
+      background: #f0fdf4;
+      border-left: 4px solid #16a34a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .muted {
+      color: #6b7280;
+    }
+
+    @media (max-width: 700px) {
+      .code-wrapper {
+        padding-left: 78px;
+      }
+
+      .line-no {
+        width: 34px;
+      }
+
+      .code-lines {
+        font-size: 14px;
+      }
+
+      .block-label {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Asymptotic Runtime Trainer</h1>
+    <div class="subtitle">
+      Choose the worst-case runtime in Big-Theta notation.
+    </div>
+
+    <div class="question-area">
+      <div class="code-card">
+        <div class="section-title">Pseudocode with Highlighted Blocks</div>
+        <div id="codeArea"></div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="section-title">Answer Choices</div>
+        <div id="answers"></div>
+      </div>
+
+      <div class="feedback-card">
+        <div id="feedback"></div>
+        <button id="nextBtn">Next Question</button>
+        <div id="explanation"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LINE_HEIGHT = 28;
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function esc(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function renderCode(question) {
+      const codeArea = document.getElementById("codeArea");
+      codeArea.innerHTML = "";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+
+      const bracketLayer = document.createElement("div");
+      bracketLayer.className = "bracket-layer";
+
+      question.code.blocks.forEach(block => {
+        const bracket = document.createElement("div");
+        bracket.className = "block-bracket";
+        bracket.style.borderColor = block.color;
+        bracket.style.top = ((block.start - 1) * LINE_HEIGHT) + "px";
+        bracket.style.height = ((block.end - block.start + 1) * LINE_HEIGHT - 4) + "px";
+
+        const label = document.createElement("div");
+        label.className = "block-label";
+        label.textContent = block.label;
+        label.style.borderColor = block.color;
+        label.style.left = "20px";
+
+        bracket.appendChild(label);
+        bracketLayer.appendChild(bracket);
+      });
+
+      const linesDiv = document.createElement("div");
+      linesDiv.className = "code-lines";
+
+      question.code.lines.forEach((line, idx) => {
+        const lineDiv = document.createElement("div");
+        lineDiv.className = "code-line";
+
+        const no = document.createElement("span");
+        no.className = "line-no";
+        no.textContent = String(idx + 1).padStart(2, " ");
+
+        const txt = document.createElement("span");
+        txt.className = "code-text";
+        txt.textContent = line;
+
+        lineDiv.appendChild(no);
+        lineDiv.appendChild(txt);
+        linesDiv.appendChild(lineDiv);
+      });
+
+      wrapper.appendChild(bracketLayer);
+      wrapper.appendChild(linesDiv);
+      codeArea.appendChild(wrapper);
+    }
+
+    function renderBlockSummaries(blocks) {
+      return blocks.map(block => `
+        <div class="block-summary">
+          <strong>${esc(block.name)}</strong> ${block.lines ? `(${esc(block.lines)})` : ""}<br>
+          <strong>Runtime per execution:</strong> ${esc(block.perExecution)}<br>
+          <strong>Number of executions in the worst case:</strong> ${esc(block.executions)}<br>
+          <strong>Contribution:</strong> ${esc(block.contribution)}<br>
+          <span class="muted">${esc(block.note || "")}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderExplanation(q) {
+      const e = q.explanation;
+      return `
+        <h3>Step-by-Step Explanation</h3>
+
+        <h4>1) Break the algorithm into highlighted blocks</h4>
+        <p>
+          The brackets in the pseudocode identify the major blocks whose work we want to count.
+          For each highlighted block, we track:
+          (i) the runtime of one execution of the block, and
+          (ii) how many times that block executes in the worst case.
+        </p>
+        ${renderBlockSummaries(e.blockSummaries)}
+
+        <h4>2) Exact-style total runtime before asymptotic simplification</h4>
+        <p>${e.exactIntro}</p>
+        <div class="math-box">${esc(e.exactRuntime)}</div>
+
+        <h4>3) Add or multiply? How to combine the blocks</h4>
+        <div class="rule-box">${e.compositionRule}</div>
+
+        <h4>4) Convert repeated work into a summation or iteration count</h4>
+        <p>${e.sumIntro}</p>
+        <div class="math-box">${esc(e.sumDisplay)}</div>
+
+        <h4>5) Explicit type classification</h4>
+        <div class="type-box">
+          <strong>Object being classified:</strong><br>
+          ${e.classificationTarget}<br><br>
+          <strong>Type used:</strong> ${e.typeName}<br><br>
+          ${e.typeReason}
+        </div>
+
+        <h4>6) Implication of the type classification</h4>
+        <div class="rule-box">${e.typeImplication}</div>
+
+        <h4>7) Asymptotic simplification</h4>
+        <p>${e.asymptoticIntro}</p>
+        <div class="math-box">${esc(e.asymptoticSimplification)}</div>
+
+        <h4>8) Final runtime</h4>
+        <div class="final-box">${esc(e.finalRuntime)}</div>
+      `;
+    }
+
+    /* =========================
+       QUESTION GENERATORS
+       ========================= */
+
+    function triangularLoop() {
+      return {
+        code: {
+          lines: [
+            "for i = 1 to n:",
+            "    for j = 1 to i:",
+            "        do O(1) work"
+          ],
+          blocks: [
+            { label: "Block 1", start: 1, end: 1, color: "#60a5fa" },
+            { label: "Block 2", start: 2, end: 3, color: "#f59e0b" }
+          ]
+        },
+        answer: "Θ(n^2)",
+        choices: ["Θ(n)", "Θ(n^2)", "Θ(n log n)", "Θ(log n)"],
+        explanation: {
+          blockSummaries: [
+            {
+              name: "Block 1: outer loop",
+              lines: "line 1",
+              perExecution: "c1",
+              executions: "n",
+              contribution: "c1·n",
+              note: "The outer loop header is encountered once for each value i = 1, 2, ..., n."
+            },
+            {
+              name: "Block 2: inner loop",
+              lines: "lines 2-3",
+              perExecution: "c2",
+              executions: "for a fixed i, exactly i times",
+              contribution: "for a fixed i: c2·i",
+              note: "When the outer variable is i, the inner loop runs from j = 1 to j = i."
+            }
+          ],
+          exactIntro:
+            "To get the exact-style upper bound, compute the cost of each highlighted block and then combine the contributions.",
+          exactRuntime:
+`T(n) = c1·n + Σ_{i=1}^{n} (c2·i)`,
+          compositionRule:
+            "The loops are nested. Since the number of executions of Block 2 depends on the current value of i from Block 1, we do not simply multiply two fixed quantities. Instead, we compute the cost of Block 2 for a fixed i and then add that cost over all outer-loop iterations. That is why a summation is required.",
+          sumIntro:
+            "The repeated work is the inner-loop contribution. For each i, the inner loop contributes c2·i, and i ranges explicitly from 1 to n.",
+          sumDisplay:
+`Σ_{i=1}^{n} (c2·i)`,
+          classificationTarget:
+            "The summand is f(i) = i.",
+          typeName:
+            "Polynomial type",
+          typeReason:
+            "The function f(i)=i is eventually nonnegative and nondecreasing. To verify polynomial type, compare f(i) with f(i/2): f(i)=i and f(i/2)=i/2, so f(i)=2·f(i/2). Therefore there exists a constant c>1 (namely c=2) such that f(i) ≤ c·f(i/2) for sufficiently large i. Hence f is of polynomial type.",
+          typeImplication:
+            "Because f(i)=i is of polynomial type, the summation rule applies: Σ_{i=1}^{n} f(i) = Θ(n·f(n)). Here f(n)=n, so Σ_{i=1}^{n} i = Θ(n·n)=Θ(n^2).",
+          asymptoticIntro:
+            "Now replace the summation by its asymptotic value and drop constants and lower-order terms.",
+          asymptoticSimplification:
+`T(n) = c1·n + Σ_{i=1}^{n} (c2·i)
+     = Θ(n) + Θ(Σ_{i=1}^{n} i)
+     = Θ(n) + Θ(n^2)
+     = Θ(n^2)`,
+          finalRuntime:
+            "Worst-case total runtime: Θ(n^2)"
+        }
+      };
+    }
+
+    function quadraticInner() {
+      return {
+        code: {
+          lines: [
+            "for i = 1 to n:",
+            "    for j = 1 to i^2:",
+            "        do O(1) work"
+          ],
+          blocks: [
+            { label: "Block 1", start: 1, end: 1, color: "#60a5fa" },
+            { label: "Block 2", start: 2, end: 3, color: "#f59e0b" }
+          ]
+        },
+        answer: "Θ(n^3)",
+        choices: ["Θ(n^2)", "Θ(n^3)", "Θ(n log n)", "Θ(n^4)"],
+        explanation: {
+          blockSummaries: [
+            {
+              name: "Block 1: outer loop",
+              lines: "line 1",
+              perExecution: "c1",
+              executions: "n",
+              contribution: "c1·n",
+              note: "The outer loop iterates once for each i from 1 to n."
+            },
+            {
+              name: "Block 2: inner loop",
+              lines: "lines 2-3",
+              perExecution: "c2",
+              executions: "for a fixed i, exactly i^2 times",
+              contribution: "for a fixed i: c2·i^2",
+              note: "For each outer-loop value i, the inner loop runs from j = 1 to j = i^2."
+            }
+          ],
+          exactIntro:
+            "Write the exact-style bound by combining the outer-loop cost with the summed inner-loop cost.",
+          exactRuntime:
+`T(n) = c1·n + Σ_{i=1}^{n} (c2·i^2)`,
+          compositionRule:
+            "The loops are nested, and the number of inner-loop iterations depends on i. Therefore we compute the cost of Block 2 for a fixed i and then sum over all i from 1 to n.",
+          sumIntro:
+            "The explicit summation is over all outer-loop values i = 1, 2, ..., n, and the summand is c2·i^2.",
+          sumDisplay:
+`Σ_{i=1}^{n} (c2·i^2)`,
+          classificationTarget:
+            "The summand is f(i) = i^2.",
+          typeName:
+            "Polynomial type",
+          typeReason:
+            "The function f(i)=i^2 is eventually nonnegative and nondecreasing. Also f(i/2)=(i/2)^2=i^2/4, so f(i)=4·f(i/2). Thus there exists a constant c>1 (namely c=4) such that f(i) ≤ c·f(i/2) for sufficiently large i. Therefore f is of polynomial type.",
+          typeImplication:
+            "For polynomial-type functions, Σ_{i=1}^{n} f(i)=Θ(n·f(n)). Here f(n)=n^2, so Σ_{i=1}^{n} i^2 = Θ(n·n^2)=Θ(n^3).",
+          asymptoticIntro:
+            "Substitute the polynomial-type bound for the summation and simplify.",
+          asymptoticSimplification:
+`T(n) = c1·n + Σ_{i=1}^{n} (c2·i^2)
+     = Θ(n) + Θ(Σ_{i=1}^{n} i^2)
+     = Θ(n) + Θ(n^3)
+     = Θ(n^3)`,
+          finalRuntime:
+            "Worst-case total runtime: Θ(n^3)"
+        }
+      };
+    }
+
+    function mixedSequential() {
+      return {
+        code: {
+          lines: [
+            "for i = 1 to n:",
+            "    do O(1) work",
+            "",
+            "for i = 1 to n:",
+            "    for j = 1 to i:",
+            "        do O(1) work"
+          ],
+          blocks: [
+            { label: "Block 1", start: 1, end: 2, color: "#10b981" },
+            { label: "Block 2", start: 4, end: 4, color: "#60a5fa" },
+            { label: "Block 3", start: 5, end: 6, color: "#f59e0b" }
+          ]
+        },
+        answer: "Θ(n^2)",
+        choices: ["Θ(n)", "Θ(n^2)", "Θ(n log n)", "Θ(n^3)"],
+        explanation: {
+          blockSummaries: [
+            {
+              name: "Block 1: first linear loop",
+              lines: "lines 1-2",
+              perExecution: "c1",
+              executions: "n",
+              contribution: "c1·n",
+              note: "This block runs once for each i from 1 to n."
+            },
+            {
+              name: "Block 2: outer loop of second section",
+              lines: "line 4",
+              perExecution: "c2",
+              executions: "n",
+              contribution: "c2·n",
+              note: "This begins the second major part of the program."
+            },
+            {
+              name: "Block 3: inner loop of second section",
+              lines: "lines 5-6",
+              perExecution: "c3",
+              executions: "for a fixed i, exactly i times",
+              contribution: "for a fixed i: c3·i",
+              note: "Inside the second section, the inner loop runs from j = 1 to j = i."
+            }
+          ],
+          exactIntro:
+            "The first major block is sequential with the second major block, so we add their contributions. Inside the second major block, the loops are nested, so the inner-loop contribution becomes a summation.",
+          exactRuntime:
+`T(n) = c1·n + c2·n + Σ_{i=1}^{n} (c3·i)`,
+          compositionRule:
+            "Use both rules here. First, sequential blocks are added: the first loop and the second loop nest are separate pieces of code, so their runtimes are summed. Second, within the second piece, the loops are nested, and the number of inner-loop executions depends on i, so that part is expressed as a summation.",
+          sumIntro:
+            "Only Block 3 creates a nontrivial summation. The outer variable i explicitly ranges from 1 to n, so the sum has bounds i=1 through i=n.",
+          sumDisplay:
+`Σ_{i=1}^{n} (c3·i)`,
+          classificationTarget:
+            "The nontrivial summand is f(i) = i.",
+          typeName:
+            "Polynomial type",
+          typeReason:
+            "The function f(i)=i is eventually nonnegative and nondecreasing, and f(i)=2·f(i/2). Therefore there exists a constant c>1, specifically c=2, such that f(i) ≤ c·f(i/2) for sufficiently large i. Hence the summand is of polynomial type.",
+          typeImplication:
+            "Since f(i)=i is polynomial type, Σ_{i=1}^{n} i = Θ(n·f(n)) = Θ(n·n)=Θ(n^2). The sequential linear terms c1·n and c2·n are lower order than the quadratic term, so the total is dominated by Θ(n^2).",
+          asymptoticIntro:
+            "Now simplify the exact-style expression by keeping only asymptotically significant terms.",
+          asymptoticSimplification:
+`T(n) = c1·n + c2·n + Σ_{i=1}^{n} (c3·i)
+     = Θ(n) + Θ(n) + Θ(Σ_{i=1}^{n} i)
+     = Θ(n) + Θ(n) + Θ(n^2)
+     = Θ(n^2)`,
+          finalRuntime:
+            "Worst-case total runtime: Θ(n^2)"
+        }
+      };
+    }
+
+    function logGrowthLoop() {
+      return {
+        code: {
+          lines: [
+            "i = 1",
+            "while i <= n:",
+            "    do O(1) work",
+            "    i = 2*i"
+          ],
+          blocks: [
+            { label: "Block 1", start: 1, end: 1, color: "#10b981" },
+            { label: "Block 2", start: 2, end: 4, color: "#8b5cf6" }
+          ]
+        },
+        answer: "Θ(log n)",
+        choices: ["Θ(n)", "Θ(log n)", "Θ(n log n)", "Θ(1)"],
+        explanation: {
+          blockSummaries: [
+            {
+              name: "Block 1: initialization",
+              lines: "line 1",
+              perExecution: "c1",
+              executions: "1",
+              contribution: "c1",
+              note: "The assignment i = 1 occurs once."
+            },
+            {
+              name: "Block 2: while-loop body",
+              lines: "lines 2-4",
+              perExecution: "c2",
+              executions: "k times",
+              contribution: "c2·k",
+              note: "We determine k by solving how many doublings are needed before i exceeds n."
+            }
+          ],
+          exactIntro:
+            "This example does not produce an additive summation. Instead, we explicitly count the number of loop iterations.",
+          exactRuntime:
+`T(n) = c1 + c2·k`,
+          compositionRule:
+            "There is only one loop body being repeated. The important question is not a summation over i, but rather how many times the loop variable can be doubled before exceeding n.",
+          sumIntro:
+            "There is no additive summation here. Instead, after k iterations the loop variable has value 2^k, so we solve for k using the loop condition.",
+          sumDisplay:
+`After k iterations, i = 2^k.
+The loop continues while 2^k <= n.
+Therefore k <= log_2(n),
+so the number of iterations is Θ(log n).`,
+          classificationTarget:
+            "There is no additive summand f(i). The object being classified is the sequence of loop-variable values: 1, 2, 4, 8, ... .",
+          typeName:
+            "Exponentially increasing progression",
+          typeReason:
+            "Each iteration multiplies the loop variable by 2. That means the visited values grow geometrically: 1, 2, 4, 8, ... . Because the growth is exponential, reaching n takes only logarithmically many steps.",
+          typeImplication:
+            "If the loop variable grows exponentially, then the number of iterations is logarithmic. Solving 2^k ≈ n gives k = Θ(log n). Since each iteration does constant work, the whole loop has runtime Θ(log n).",
+          asymptoticIntro:
+            "Replace k by Θ(log n) in the exact-style expression.",
+          asymptoticSimplification:
+`T(n) = c1 + c2·k
+     = Θ(1) + Θ(log n)
+     = Θ(log n)`,
+          finalRuntime:
+            "Worst-case total runtime: Θ(log n)"
+        }
+      };
+    }
+
+    function logDecayLoop() {
+      return {
+        code: {
+          lines: [
+            "i = n",
+            "while i >= 1:",
+            "    do O(1) work",
+            "    i = floor(i / 2)"
+          ],
+          blocks: [
+            { label: "Block 1", start: 1, end: 1, color: "#10b981" },
+            { label: "Block 2", start: 2, end: 4, color: "#8b5cf6" }
+          ]
+        },
+        answer: "Θ(log n)",
+        choices: ["Θ(n)", "Θ(log n)", "Θ(n log n)", "Θ(1)"],
+        explanation: {
+          blockSummaries: [
+            {
+              name: "Block 1: initialization",
+              lines: "line 1",
+              perExecution: "c1",
+              executions: "1",
+              contribution: "c1",
+              note: "The assignment i = n occurs once."
+            },
+            {
+              name: "Block 2: while-loop body",
+              lines: "lines 2-4",
+              perExecution: "c2",
+              executions: "k times",
+              contribution: "c2·k",
+              note: "We determine k by solving how many halvings are needed before i drops below 1."
+            }
+          ],
+          exactIntro:
+            "Again, there is no additive summation. The main task is to count the number of loop iterations.",
+          exactRuntime:
+`T(n) = c1 + c2·k`,
+          compositionRule:
+            "This is a repeated loop body whose control variable shrinks by a constant factor each iteration. Therefore the analysis comes from solving the iteration count, not from summing an i-dependent term.",
+          sumIntro:
+            "After k iterations, the loop variable is approximately n / 2^k. The loop stops once that value is less than 1.",
+          sumDisplay:
+`After k iterations, i ≈ n / 2^k.
+The loop stops when n / 2^k < 1.
+Equivalently, 2^k > n.
+Therefore k = Θ(log n).`,
+          classificationTarget:
+            "There is no additive summand f(i). The object being classified is the sequence of loop-variable values: n, n/2, n/4, n/8, ... .",
+          typeName:
+            "Exponentially decreasing progression",
+          typeReason:
+            "Each iteration divides the loop variable by 2. That means the values decrease geometrically: n, n/2, n/4, n/8, ... . Because a constant-factor shrinkage reaches 1 after logarithmically many steps, the number of iterations is Θ(log n).",
+          typeImplication:
+            "If a loop variable decreases exponentially, then the loop runs for only logarithmically many iterations. Solving n / 2^k ≈ 1 gives k = Θ(log n). With constant work per iteration, the runtime is Θ(log n).",
+          asymptoticIntro:
+            "Substitute the logarithmic iteration count into the exact-style expression.",
+          asymptoticSimplification:
+`T(n) = c1 + c2·k
+     = Θ(1) + Θ(log n)
+     = Θ(log n)`,
+          finalRuntime:
+            "Worst-case total runtime: Θ(log n)"
+        }
+      };
+    }
+
+    const generators = [
+      triangularLoop,
+      quadraticInner,
+      mixedSequential,
+      logGrowthLoop,
+      logDecayLoop
+    ];
+
+    let current = null;
+    let answered = false;
+
+    function newQuestion() {
+      answered = false;
+
+      current = generators[Math.floor(Math.random() * generators.length)]();
+
+      renderCode(current);
+
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = "";
+
+      const choices = shuffle(current.choices);
+
+      choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "answer-btn";
+        btn.innerText = choice;
+        btn.onclick = () => handleAnswer(choice, btn);
+        answersDiv.appendChild(btn);
+      });
+
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("explanation").style.display = "none";
+      document.getElementById("explanation").innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+    }
+
+    function handleAnswer(choice, clickedBtn) {
+      if (answered) return;
+      answered = true;
+
+      const buttons = document.querySelectorAll(".answer-btn");
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (choice === current.answer) {
+        clickedBtn.classList.add("correct");
+        document.getElementById("feedback").innerText = "✅ Correct!";
+      } else {
+        clickedBtn.classList.add("wrong");
+        document.getElementById("feedback").innerText =
+          "❌ Incorrect. Correct answer: " + current.answer;
+
+        buttons.forEach(btn => {
+          if (btn.innerText === current.answer) {
+            btn.classList.add("missed-correct");
+          }
+        });
+      }
+
+      const explanation = document.getElementById("explanation");
+      explanation.innerHTML = renderExplanation(current);
+      explanation.style.display = "block";
+
+      document.getElementById("nextBtn").style.display = "inline-block";
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", newQuestion);
+
+    newQuestion();
+  </script>
+</body>
+</html>
