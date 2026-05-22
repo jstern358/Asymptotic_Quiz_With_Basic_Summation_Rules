@@ -30,7 +30,22 @@
     .subtitle {
       text-align: center;
       color: #4b5563;
-      margin-bottom: 22px;
+      margin-bottom: 14px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: #374151;
+      font-size: 15px;
+    }
+
+    .controls label {
+      cursor: pointer;
+      user-select: none;
     }
 
     .question-area {
@@ -51,6 +66,13 @@
       font-weight: bold;
       margin-top: 0;
       margin-bottom: 12px;
+    }
+
+    .section-note {
+      margin-top: -6px;
+      margin-bottom: 12px;
+      color: #6b7280;
+      font-size: 14px;
     }
 
     /* ---------- CODE RENDERING ---------- */
@@ -304,9 +326,17 @@
       Choose the worst-case runtime in Big-Theta notation.
     </div>
 
+    <div class="controls">
+      <input type="checkbox" id="showBlocksToggle" />
+      <label for="showBlocksToggle">Show code block numbers before answering</label>
+    </div>
+
     <div class="question-area">
       <div class="code-card">
-        <div class="section-title">Pseudocode with Highlighted Blocks</div>
+        <div class="section-title">Pseudocode</div>
+        <div class="section-note" id="codeNote">
+          Code block labels are hidden until you answer, unless you enable the checkbox above.
+        </div>
         <div id="codeArea"></div>
       </div>
 
@@ -342,7 +372,12 @@
         .replaceAll(">", "&gt;");
     }
 
-    function renderCode(question) {
+    function withOptionalBlocks(blocks, showBlocks) {
+      if (!showBlocks) return [];
+      return blocks;
+    }
+
+    function renderCode(question, showBlocks) {
       const codeArea = document.getElementById("codeArea");
       codeArea.innerHTML = "";
 
@@ -352,7 +387,7 @@
       const bracketLayer = document.createElement("div");
       bracketLayer.className = "bracket-layer";
 
-      question.code.blocks.forEach(block => {
+      withOptionalBlocks(question.code.blocks, showBlocks).forEach(block => {
         const bracket = document.createElement("div");
         bracket.className = "block-bracket";
         bracket.style.borderColor = block.color;
@@ -398,40 +433,29 @@
       return blocks.map(block => `
         <div class="block-summary">
           <strong>${esc(block.name)}</strong> ${block.lines ? `(${esc(block.lines)})` : ""}<br>
-          <strong>Runtime per execution:</strong> ${esc(block.perExecution)}<br>
-          <strong>Number of executions in the worst case:</strong> ${esc(block.executions)}<br>
-          <strong>Contribution:</strong> ${esc(block.contribution)}<br>
+          <strong>Runtime of one execution of this block:</strong> ${esc(block.perExecution)}<br>
+          <strong>How many times this block executes in the worst case:</strong> ${esc(block.executions)}<br>
+          <strong>Total contribution of this block:</strong> ${esc(block.contribution)}<br>
           <span class="muted">${esc(block.note || "")}</span>
         </div>
       `).join("");
     }
 
-    function renderExplanation(q) {
-      const e = q.explanation;
+    function renderSummationSection(e) {
+      if (!e.hasSummation) {
+        return `
+          <h4>4) Iteration-count analysis</h4>
+          <p>${e.sumIntro}</p>
+          <div class="math-box">${esc(e.sumDisplay)}</div>
+        `;
+      }
+
       return `
-        <h3>Step-by-Step Explanation</h3>
-
-        <h4>1) Break the algorithm into highlighted blocks</h4>
-        <p>
-          The brackets in the pseudocode identify the major blocks whose work we want to count.
-          For each highlighted block, we track:
-          (i) the runtime of one execution of the block, and
-          (ii) how many times that block executes in the worst case.
-        </p>
-        ${renderBlockSummaries(e.blockSummaries)}
-
-        <h4>2) Exact-style total runtime before asymptotic simplification</h4>
-        <p>${e.exactIntro}</p>
-        <div class="math-box">${esc(e.exactRuntime)}</div>
-
-        <h4>3) Add or multiply? How to combine the blocks</h4>
-        <div class="rule-box">${e.compositionRule}</div>
-
-        <h4>4) Convert repeated work into a summation or iteration count</h4>
+        <h4>4) Convert repeated work into a summation</h4>
         <p>${e.sumIntro}</p>
         <div class="math-box">${esc(e.sumDisplay)}</div>
 
-        <h4>5) Explicit type classification</h4>
+        <h4>5) Summation type classification</h4>
         <div class="type-box">
           <strong>Object being classified:</strong><br>
           ${e.classificationTarget}<br><br>
@@ -441,19 +465,41 @@
 
         <h4>6) Implication of the type classification</h4>
         <div class="rule-box">${e.typeImplication}</div>
-
-        <h4>7) Asymptotic simplification</h4>
-        <p>${e.asymptoticIntro}</p>
-        <div class="math-box">${esc(e.asymptoticSimplification)}</div>
-
-        <h4>8) Final runtime</h4>
-        <div class="final-box">${esc(e.finalRuntime)}</div>
       `;
     }
 
-    /* =========================
-       QUESTION GENERATORS
-       ========================= */
+    function renderExplanation(q) {
+      const e = q.explanation;
+      return `
+        <h3>Step-by-Step Explanation</h3>
+
+        <h4>1) Break the algorithm into highlighted blocks</h4>
+        <p>
+          The brackets in the pseudocode identify the major blocks whose work we count.
+          For each highlighted block, keep <strong>two ideas separate</strong>:
+          (i) the runtime of <em>one execution</em> of that block, and
+          (ii) the <em>number of times</em> that block executes in the worst case.
+          The total contribution of a block is obtained by multiplying those two quantities.
+        </p>
+        ${renderBlockSummaries(e.blockSummaries)}
+
+        <h4>2) Exact-style total runtime before asymptotic simplification</h4>
+        <p>${e.exactIntro}</p>
+        <div class="math-box">${esc(e.exactRuntime)}</div>
+
+        <h4>3) How the blocks combine</h4>
+        <div class="rule-box">${e.compositionRule}</div>
+
+        ${renderSummationSection(e)}
+
+        <h4>${e.hasSummation ? '7' : '5'}) Asymptotic simplification</h4>
+        <p>${e.asymptoticIntro}</p>
+        <div class="math-box">${esc(e.asymptoticSimplification)}</div>
+
+        <h4>${e.hasSummation ? '8' : '6'}) Final runtime</h4>
+        <div class="final-box">${esc(e.finalRuntime)}</div>
+      `;
+    }
 
     function triangularLoop() {
       return {
@@ -471,6 +517,7 @@
         answer: "Θ(n^2)",
         choices: ["Θ(n)", "Θ(n^2)", "Θ(n log n)", "Θ(log n)"],
         explanation: {
+          hasSummation: true,
           blockSummaries: [
             {
               name: "Block 1: outer loop",
@@ -478,37 +525,39 @@
               perExecution: "c1",
               executions: "n",
               contribution: "c1·n",
-              note: "The outer loop header is encountered once for each value i = 1, 2, ..., n."
+              note: "The outer loop advances i through the values 1, 2, ..., n."
             },
             {
-              name: "Block 2: inner loop",
+              name: "Block 2: inner loop body",
               lines: "lines 2-3",
               perExecution: "c2",
               executions: "for a fixed i, exactly i times",
               contribution: "for a fixed i: c2·i",
-              note: "When the outer variable is i, the inner loop runs from j = 1 to j = i."
+              note: "For one chosen outer-loop value i, the inner loop runs from j = 1 to j = i."
             }
           ],
           exactIntro:
-            "To get the exact-style upper bound, compute the cost of each highlighted block and then combine the contributions.",
+            "First keep Block 2 local: for one fixed outer-loop value i, Block 2 contributes c2·i. Only after that do we add those contributions over all outer-loop values.",
           exactRuntime:
 `T(n) = c1·n + Σ_{i=1}^{n} (c2·i)`,
           compositionRule:
-            "The loops are nested. Since the number of executions of Block 2 depends on the current value of i from Block 1, we do not simply multiply two fixed quantities. Instead, we compute the cost of Block 2 for a fixed i and then add that cost over all outer-loop iterations. That is why a summation is required.",
+            "Block 2 is nested inside Block 1. Because the number of executions of Block 2 depends on the current outer-loop value i, we first compute the cost of Block 2 for one fixed i, and then sum those costs over i = 1 through n.",
           sumIntro:
-            "The repeated work is the inner-loop contribution. For each i, the inner loop contributes c2·i, and i ranges explicitly from 1 to n.",
+            "The summation appears only after we have already computed the total contribution of Block 2 for a fixed i. The explicit bounds come from the outer loop: i starts at 1 and ends at n.",
           sumDisplay:
-`Σ_{i=1}^{n} (c2·i)`,
+`For a fixed i, Block 2 contributes c2·i.
+Therefore the repeated contribution is
+Σ_{i=1}^{n} (c2·i).`,
           classificationTarget:
             "The summand is f(i) = i.",
           typeName:
             "Polynomial type",
           typeReason:
-            "The function f(i)=i is eventually nonnegative and nondecreasing. To verify polynomial type, compare f(i) with f(i/2): f(i)=i and f(i/2)=i/2, so f(i)=2·f(i/2). Therefore there exists a constant c>1 (namely c=2) such that f(i) ≤ c·f(i/2) for sufficiently large i. Hence f is of polynomial type.",
+            "The function f(i)=i is eventually nonnegative and nondecreasing. Also f(i/2)=i/2, so f(i)=2·f(i/2). Therefore there exists a constant c>1 (here c=2) such that f(i) ≤ c·f(i/2) for sufficiently large i. Hence the summand is of polynomial type.",
           typeImplication:
-            "Because f(i)=i is of polynomial type, the summation rule applies: Σ_{i=1}^{n} f(i) = Θ(n·f(n)). Here f(n)=n, so Σ_{i=1}^{n} i = Θ(n·n)=Θ(n^2).",
+            "Because f(i)=i is of polynomial type, Σ_{i=1}^{n} f(i) = Θ(n·f(n)). Here f(n)=n, so Σ_{i=1}^{n} i = Θ(n·n)=Θ(n^2).",
           asymptoticIntro:
-            "Now replace the summation by its asymptotic value and drop constants and lower-order terms.",
+            "Now replace the summation by its asymptotic value and ignore constants and lower-order terms.",
           asymptoticSimplification:
 `T(n) = c1·n + Σ_{i=1}^{n} (c2·i)
      = Θ(n) + Θ(Σ_{i=1}^{n} i)
@@ -536,6 +585,7 @@
         answer: "Θ(n^3)",
         choices: ["Θ(n^2)", "Θ(n^3)", "Θ(n log n)", "Θ(n^4)"],
         explanation: {
+          hasSummation: true,
           blockSummaries: [
             {
               name: "Block 1: outer loop",
@@ -543,37 +593,39 @@
               perExecution: "c1",
               executions: "n",
               contribution: "c1·n",
-              note: "The outer loop iterates once for each i from 1 to n."
+              note: "The outer loop takes i through 1, 2, ..., n."
             },
             {
-              name: "Block 2: inner loop",
+              name: "Block 2: inner loop body",
               lines: "lines 2-3",
               perExecution: "c2",
               executions: "for a fixed i, exactly i^2 times",
               contribution: "for a fixed i: c2·i^2",
-              note: "For each outer-loop value i, the inner loop runs from j = 1 to j = i^2."
+              note: "For one chosen outer-loop value i, the inner loop runs j = 1 through j = i^2."
             }
           ],
           exactIntro:
-            "Write the exact-style bound by combining the outer-loop cost with the summed inner-loop cost.",
+            "Again, first analyze Block 2 for one fixed i. For that single outer-loop value, the total contribution of Block 2 is c2·i^2. Only then do we sum over all outer-loop values.",
           exactRuntime:
 `T(n) = c1·n + Σ_{i=1}^{n} (c2·i^2)`,
           compositionRule:
-            "The loops are nested, and the number of inner-loop iterations depends on i. Therefore we compute the cost of Block 2 for a fixed i and then sum over all i from 1 to n.",
+            "The inner block is nested inside the outer loop, and its number of executions depends on i. That forces a summation over the outer-loop values after computing the fixed-i contribution.",
           sumIntro:
-            "The explicit summation is over all outer-loop values i = 1, 2, ..., n, and the summand is c2·i^2.",
+            "The explicit summation bounds are determined by the outer loop: i runs from 1 to n. The summand is the fixed-i contribution of Block 2.",
           sumDisplay:
-`Σ_{i=1}^{n} (c2·i^2)`,
+`For a fixed i, Block 2 contributes c2·i^2.
+Therefore the repeated contribution is
+Σ_{i=1}^{n} (c2·i^2).`,
           classificationTarget:
             "The summand is f(i) = i^2.",
           typeName:
             "Polynomial type",
           typeReason:
-            "The function f(i)=i^2 is eventually nonnegative and nondecreasing. Also f(i/2)=(i/2)^2=i^2/4, so f(i)=4·f(i/2). Thus there exists a constant c>1 (namely c=4) such that f(i) ≤ c·f(i/2) for sufficiently large i. Therefore f is of polynomial type.",
+            "The function f(i)=i^2 is eventually nonnegative and nondecreasing. Also f(i/2)=(i/2)^2=i^2/4, so f(i)=4·f(i/2). Therefore there exists a constant c>1 (here c=4) such that f(i) ≤ c·f(i/2) for sufficiently large i. Hence the summand is of polynomial type.",
           typeImplication:
             "For polynomial-type functions, Σ_{i=1}^{n} f(i)=Θ(n·f(n)). Here f(n)=n^2, so Σ_{i=1}^{n} i^2 = Θ(n·n^2)=Θ(n^3).",
           asymptoticIntro:
-            "Substitute the polynomial-type bound for the summation and simplify.",
+            "Substitute the asymptotic value of the summation and simplify.",
           asymptoticSimplification:
 `T(n) = c1·n + Σ_{i=1}^{n} (c2·i^2)
      = Θ(n) + Θ(Σ_{i=1}^{n} i^2)
@@ -605,6 +657,7 @@
         answer: "Θ(n^2)",
         choices: ["Θ(n)", "Θ(n^2)", "Θ(n log n)", "Θ(n^3)"],
         explanation: {
+          hasSummation: true,
           blockSummaries: [
             {
               name: "Block 1: first linear loop",
@@ -612,7 +665,7 @@
               perExecution: "c1",
               executions: "n",
               contribution: "c1·n",
-              note: "This block runs once for each i from 1 to n."
+              note: "This is one complete sequential block of code."
             },
             {
               name: "Block 2: outer loop of second section",
@@ -620,37 +673,39 @@
               perExecution: "c2",
               executions: "n",
               contribution: "c2·n",
-              note: "This begins the second major part of the program."
+              note: "This controls the second major section of the program."
             },
             {
-              name: "Block 3: inner loop of second section",
+              name: "Block 3: inner loop body of second section",
               lines: "lines 5-6",
               perExecution: "c3",
               executions: "for a fixed i, exactly i times",
               contribution: "for a fixed i: c3·i",
-              note: "Inside the second section, the inner loop runs from j = 1 to j = i."
+              note: "For one chosen outer-loop value i, the inner loop runs from j = 1 to j = i."
             }
           ],
           exactIntro:
-            "The first major block is sequential with the second major block, so we add their contributions. Inside the second major block, the loops are nested, so the inner-loop contribution becomes a summation.",
+            "There are two sequential major pieces. Block 1 contributes c1·n. In the second major piece, Block 3 contributes c3·i for a fixed i, and that contribution is then summed over the outer-loop values.",
           exactRuntime:
 `T(n) = c1·n + c2·n + Σ_{i=1}^{n} (c3·i)`,
           compositionRule:
-            "Use both rules here. First, sequential blocks are added: the first loop and the second loop nest are separate pieces of code, so their runtimes are summed. Second, within the second piece, the loops are nested, and the number of inner-loop executions depends on i, so that part is expressed as a summation.",
+            "Because Block 1 and the second major section occur one after the other, their runtimes are added. Inside the second major section, Block 3 is nested inside Block 2, so the fixed-i contribution of Block 3 is summed over i = 1 through n.",
           sumIntro:
-            "Only Block 3 creates a nontrivial summation. The outer variable i explicitly ranges from 1 to n, so the sum has bounds i=1 through i=n.",
+            "Only Block 3 creates a nontrivial summation, because its number of executions depends on the outer-loop value i. The explicit bounds come from Block 2: i runs from 1 to n.",
           sumDisplay:
-`Σ_{i=1}^{n} (c3·i)`,
+`For a fixed i, Block 3 contributes c3·i.
+Therefore the repeated contribution is
+Σ_{i=1}^{n} (c3·i).`,
           classificationTarget:
-            "The nontrivial summand is f(i) = i.",
+            "The summand is f(i) = i.",
           typeName:
             "Polynomial type",
           typeReason:
-            "The function f(i)=i is eventually nonnegative and nondecreasing, and f(i)=2·f(i/2). Therefore there exists a constant c>1, specifically c=2, such that f(i) ≤ c·f(i/2) for sufficiently large i. Hence the summand is of polynomial type.",
+            "The function f(i)=i is eventually nonnegative and nondecreasing, and f(i)=2·f(i/2). Therefore the polynomial-type condition f(i) ≤ c·f(i/2) holds for c=2.",
           typeImplication:
-            "Since f(i)=i is polynomial type, Σ_{i=1}^{n} i = Θ(n·f(n)) = Θ(n·n)=Θ(n^2). The sequential linear terms c1·n and c2·n are lower order than the quadratic term, so the total is dominated by Θ(n^2).",
+            "Since f(i)=i is polynomial type, Σ_{i=1}^{n} i = Θ(n·n)=Θ(n^2). The linear terms c1·n and c2·n are lower-order than the quadratic term, so Θ(n^2) dominates.",
           asymptoticIntro:
-            "Now simplify the exact-style expression by keeping only asymptotically significant terms.",
+            "Replace the summation by its asymptotic order and simplify the sum of the sequential pieces.",
           asymptoticSimplification:
 `T(n) = c1·n + c2·n + Σ_{i=1}^{n} (c3·i)
      = Θ(n) + Θ(n) + Θ(Σ_{i=1}^{n} i)
@@ -679,6 +734,7 @@
         answer: "Θ(log n)",
         choices: ["Θ(n)", "Θ(log n)", "Θ(n log n)", "Θ(1)"],
         explanation: {
+          hasSummation: false,
           blockSummaries: [
             {
               name: "Block 1: initialization",
@@ -686,7 +742,7 @@
               perExecution: "c1",
               executions: "1",
               contribution: "c1",
-              note: "The assignment i = 1 occurs once."
+              note: "The assignment i = 1 happens once."
             },
             {
               name: "Block 2: while-loop body",
@@ -694,32 +750,24 @@
               perExecution: "c2",
               executions: "k times",
               contribution: "c2·k",
-              note: "We determine k by solving how many doublings are needed before i exceeds n."
+              note: "Here k is the total number of loop iterations. Notice that c2 is the cost of one iteration of Block 2, while k is the count of how many times that block repeats."
             }
           ],
           exactIntro:
-            "This example does not produce an additive summation. Instead, we explicitly count the number of loop iterations.",
+            "There is no summation here. Keep the two quantities separate: one execution of Block 2 costs c2, and the number of executions is k. Therefore Block 2 contributes c2·k.",
           exactRuntime:
 `T(n) = c1 + c2·k`,
           compositionRule:
-            "There is only one loop body being repeated. The important question is not a summation over i, but rather how many times the loop variable can be doubled before exceeding n.",
+            "Block 1 runs once. Block 2 then repeats k times. The only remaining task is to determine k, the number of loop iterations.",
           sumIntro:
-            "There is no additive summation here. Instead, after k iterations the loop variable has value 2^k, so we solve for k using the loop condition.",
+            "Because no i-dependent contribution is being added across a range of i values, there is no summation to classify. Instead, we solve directly for the iteration count k.",
           sumDisplay:
-`After k iterations, i = 2^k.
+`After k iterations, the loop variable has value i = 2^k.
 The loop continues while 2^k <= n.
 Therefore k <= log_2(n),
-so the number of iterations is Θ(log n).`,
-          classificationTarget:
-            "There is no additive summand f(i). The object being classified is the sequence of loop-variable values: 1, 2, 4, 8, ... .",
-          typeName:
-            "Exponentially increasing progression",
-          typeReason:
-            "Each iteration multiplies the loop variable by 2. That means the visited values grow geometrically: 1, 2, 4, 8, ... . Because the growth is exponential, reaching n takes only logarithmically many steps.",
-          typeImplication:
-            "If the loop variable grows exponentially, then the number of iterations is logarithmic. Solving 2^k ≈ n gives k = Θ(log n). Since each iteration does constant work, the whole loop has runtime Θ(log n).",
+so k = Θ(log n).`,
           asymptoticIntro:
-            "Replace k by Θ(log n) in the exact-style expression.",
+            "Substitute the value of k into the exact-style runtime expression.",
           asymptoticSimplification:
 `T(n) = c1 + c2·k
      = Θ(1) + Θ(log n)
@@ -747,6 +795,7 @@ so the number of iterations is Θ(log n).`,
         answer: "Θ(log n)",
         choices: ["Θ(n)", "Θ(log n)", "Θ(n log n)", "Θ(1)"],
         explanation: {
+          hasSummation: false,
           blockSummaries: [
             {
               name: "Block 1: initialization",
@@ -754,7 +803,7 @@ so the number of iterations is Θ(log n).`,
               perExecution: "c1",
               executions: "1",
               contribution: "c1",
-              note: "The assignment i = n occurs once."
+              note: "The assignment i = n happens once."
             },
             {
               name: "Block 2: while-loop body",
@@ -762,32 +811,24 @@ so the number of iterations is Θ(log n).`,
               perExecution: "c2",
               executions: "k times",
               contribution: "c2·k",
-              note: "We determine k by solving how many halvings are needed before i drops below 1."
+              note: "Again, c2 is the cost of one iteration of the loop body, while k is the number of times that loop body repeats."
             }
           ],
           exactIntro:
-            "Again, there is no additive summation. The main task is to count the number of loop iterations.",
+            "This is another no-summation case. The block contribution comes from cost per iteration times number of iterations: c2·k.",
           exactRuntime:
 `T(n) = c1 + c2·k`,
           compositionRule:
-            "This is a repeated loop body whose control variable shrinks by a constant factor each iteration. Therefore the analysis comes from solving the iteration count, not from summing an i-dependent term.",
+            "Block 1 executes once, and Block 2 repeats until the loop variable drops below 1. So the main job is to determine the number of loop iterations k.",
           sumIntro:
-            "After k iterations, the loop variable is approximately n / 2^k. The loop stops once that value is less than 1.",
+            "Because no sequence of fixed-i contributions is being added together, summation types do not apply here. We solve directly for the number of times the loop can halve n before dropping below 1.",
           sumDisplay:
-`After k iterations, i ≈ n / 2^k.
+`After k iterations, the loop variable is approximately i = n / 2^k.
 The loop stops when n / 2^k < 1.
 Equivalently, 2^k > n.
 Therefore k = Θ(log n).`,
-          classificationTarget:
-            "There is no additive summand f(i). The object being classified is the sequence of loop-variable values: n, n/2, n/4, n/8, ... .",
-          typeName:
-            "Exponentially decreasing progression",
-          typeReason:
-            "Each iteration divides the loop variable by 2. That means the values decrease geometrically: n, n/2, n/4, n/8, ... . Because a constant-factor shrinkage reaches 1 after logarithmically many steps, the number of iterations is Θ(log n).",
-          typeImplication:
-            "If a loop variable decreases exponentially, then the loop runs for only logarithmically many iterations. Solving n / 2^k ≈ 1 gives k = Θ(log n). With constant work per iteration, the runtime is Θ(log n).",
           asymptoticIntro:
-            "Substitute the logarithmic iteration count into the exact-style expression.",
+            "Substitute the logarithmic iteration count into the exact-style runtime expression.",
           asymptoticSimplification:
 `T(n) = c1 + c2·k
      = Θ(1) + Θ(log n)
@@ -809,12 +850,29 @@ Therefore k = Θ(log n).`,
     let current = null;
     let answered = false;
 
+    function shouldShowBlocksBeforeAnswer() {
+      return document.getElementById("showBlocksToggle").checked;
+    }
+
+    function refreshCodeVisibility() {
+      if (!current) return;
+      const showBlocks = answered || shouldShowBlocksBeforeAnswer();
+      renderCode(current, showBlocks);
+      const note = document.getElementById("codeNote");
+      if (answered) {
+        note.textContent = "Highlighted code blocks are shown below and are referenced in the explanation.";
+      } else if (shouldShowBlocksBeforeAnswer()) {
+        note.textContent = "Code block labels are currently visible because the checkbox is enabled.";
+      } else {
+        note.textContent = "Code block labels are hidden until you answer, unless you enable the checkbox above.";
+      }
+    }
+
     function newQuestion() {
       answered = false;
-
       current = generators[Math.floor(Math.random() * generators.length)]();
 
-      renderCode(current);
+      refreshCodeVisibility();
 
       const answersDiv = document.getElementById("answers");
       answersDiv.innerHTML = "";
@@ -857,6 +915,8 @@ Therefore k = Θ(log n).`,
         });
       }
 
+      refreshCodeVisibility();
+
       const explanation = document.getElementById("explanation");
       explanation.innerHTML = renderExplanation(current);
       explanation.style.display = "block";
@@ -865,6 +925,7 @@ Therefore k = Θ(log n).`,
     }
 
     document.getElementById("nextBtn").addEventListener("click", newQuestion);
+    document.getElementById("showBlocksToggle").addEventListener("change", refreshCodeVisibility);
 
     newQuestion();
   </script>
