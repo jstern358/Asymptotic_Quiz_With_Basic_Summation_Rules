@@ -98,7 +98,7 @@ function newQuestion(){
   document.getElementById("feedback").innerText="";
   document.getElementById("explanation").style.display="none";
 
-  current = generators[Math.floor(Math.random()*generators.length)];
+  current = generators[Math.floor(Math.random()*generators.length)]();
 
   document.getElementById("code").innerText=current.code;
 
