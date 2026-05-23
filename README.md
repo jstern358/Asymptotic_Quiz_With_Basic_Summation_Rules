@@ -1,7 +1,14 @@
 # Asymptotic Runtime Trainer
 
-## Bug fix + combinator cleanup
-- Fixed the JavaScript bug that prevented questions from rendering at all.
-- Kept the reusable family approach, but simplified it so every referenced template is explicitly defined and wired.
-- Preserved safe factorable body costs from \(\{1, \log n, n, n^2\}\).
-- Preserved the standardized explanation flow and optional full summation type breakdown button.
+This bundle is a clean, working replacement for all runtime files:
+- index.html
+- styles.css
+- questions.js
+- app.js
+
+It keeps the essential trainer behavior:
+- level selector
+- visible pseudocode and answers
+- next button
+- explanation panel
+- optional full summation type breakdown

@@ -19,12 +19,7 @@
 
   function currentLevel() { return parseInt(document.getElementById('levelSelect').value, 10); }
   function shouldShowBlocksBeforeAnswer() { return document.getElementById('showBlocksToggle').checked; }
-
-  function typesetMath(node) {
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise([node]).catch(() => {});
-    }
-  }
+  function typesetMath(node) { if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise([node]).catch(() => {}); } }
 
   function buildDeck(level) {
     const templates = window.TrainerData.getTemplatesForLevel(level);
@@ -39,10 +34,7 @@
     let chosenDeckIndex = 0;
     for (let i = 0; i < deck.length; i++) {
       const familyName = templates[deck[i]].name || ('template_' + deck[i]);
-      if (!recent.includes(familyName) || deck.length === 1) {
-        chosenDeckIndex = i;
-        break;
-      }
+      if (!recent.includes(familyName) || deck.length === 1) { chosenDeckIndex = i; break; }
     }
     const templateIndex = deck.splice(chosenDeckIndex, 1)[0];
     const factory = templates[templateIndex];
@@ -60,7 +52,6 @@
     wrapper.className = 'code-wrapper';
     const bracketLayer = document.createElement('div');
     bracketLayer.className = 'bracket-layer';
-
     if (showBlocks) {
       question.code.blocks.forEach(block => {
         const bracket = document.createElement('div');
@@ -76,7 +67,6 @@
         bracketLayer.appendChild(bracket);
       });
     }
-
     const linesDiv = document.createElement('div');
     linesDiv.className = 'code-lines';
     question.code.lines.forEach((line, idx) => {
@@ -92,7 +82,6 @@
       row.appendChild(txt);
       linesDiv.appendChild(row);
     });
-
     wrapper.appendChild(bracketLayer);
     wrapper.appendChild(linesDiv);
     codeArea.appendChild(wrapper);
