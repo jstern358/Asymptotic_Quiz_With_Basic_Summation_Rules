@@ -1,7 +1,7 @@
 # Asymptotic Runtime Trainer
 
-## Template-combinator expansion in this update
-- Added a broader safe factorable body-cost library: \(\{1, \log n, n, n^2\}\).
-- Refactored the question generator so polynomial, exponentially-increasing, and exponentially-decreasing problems are built from reusable families rather than one-off templates.
-- Added new families that combine safe factorable body costs with canonical, shifted, scaled, and exponential summation forms.
-- Preserved the theorem-safe workflow: form the sum -> simplify the sum -> determine the type -> evaluate the sum.
+## Bug fix + combinator cleanup
+- Fixed the JavaScript bug that prevented questions from rendering at all.
+- Kept the reusable family approach, but simplified it so every referenced template is explicitly defined and wired.
+- Preserved safe factorable body costs from \(\{1, \log n, n, n^2\}\).
+- Preserved the standardized explanation flow and optional full summation type breakdown button.

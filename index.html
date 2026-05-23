@@ -6,7 +6,10 @@
   <title>Asymptotic Runtime Trainer</title>
   <script>
     window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
       svg: { fontCache: 'global' }
     };
   </script>
@@ -19,7 +22,8 @@
       <h1>Asymptotic Runtime Trainer</h1>
       <p class="subtitle">Choose the worst-case runtime in Big-Theta notation.</p>
     </header>
-    <section class="controls">
+
+    <section class="controls" aria-label="Trainer settings">
       <div class="control-group">
         <label for="levelSelect"><strong>Level:</strong></label>
         <select id="levelSelect">
@@ -29,23 +33,37 @@
           <option value="4">4</option>
           <option value="5">5</option>
         </select>
-        <div class="helper-text">Higher levels add reusable summation families and safe factorable \(O(g(n))\) body costs from \(\{1, \log n, n, n^2\}\).</div>
+        <div class="helper-text">Higher levels include more nesting, more additive compositions, richer summations, and safe factorable \(O(g(n))\) block costs from \(\{1, \log n, n, n^2\}\).</div>
       </div>
       <div class="control-group checkbox-group">
         <input type="checkbox" id="showBlocksToggle" />
         <label for="showBlocksToggle">Show code block numbers before answering</label>
       </div>
     </section>
+
     <main class="question-area">
       <section class="card">
-        <div class="card-header"><h2>Pseudocode</h2><span class="badge" id="currentLevelBadge">Level 1</span></div>
+        <div class="card-header">
+          <h2>Pseudocode</h2>
+          <span class="badge" id="currentLevelBadge">Level 1</span>
+        </div>
         <p class="note" id="codeNote">Code block labels are hidden until you answer, unless you enable the checkbox above.</p>
         <div id="codeArea"></div>
       </section>
-      <section class="card"><div class="card-header"><h2>Answer Choices</h2></div><div id="answers"></div></section>
-      <section class="card"><div id="feedback"></div><div class="button-row"><button id="nextBtn">Next Question</button></div><div id="explanation"></div></section>
+
+      <section class="card">
+        <div class="card-header"><h2>Answer Choices</h2></div>
+        <div id="answers"></div>
+      </section>
+
+      <section class="card">
+        <div id="feedback"></div>
+        <div class="button-row"><button id="nextBtn">Next Question</button></div>
+        <div id="explanation"></div>
+      </section>
     </main>
   </div>
+
   <script src="questions.js"></script>
   <script src="app.js"></script>
 </body>
