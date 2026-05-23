@@ -1,14 +1,7 @@
 # Asymptotic Runtime Trainer
 
-## New in this update
-- Clean standard step-by-step explanation now uses a single step for summation type determination.
-- Added a button labeled **Full summation type analysis/breakdown** that inserts the formal type-verification steps only when requested.
-- Added more pseudocode variety in loop lower bounds, upper bounds, and summation shapes.
-- Preserved the corrected exponentially-decreasing reasoning by factoring out external multiplicative terms before applying the type theorem.
-
-## Files
-- index.html
-- styles.css
-- questions.js
-- app.js
-- README.md
+## Template-combinator expansion in this update
+- Added a broader safe factorable body-cost library: \(\{1, \log n, n, n^2\}\).
+- Refactored the question generator so polynomial, exponentially-increasing, and exponentially-decreasing problems are built from reusable families rather than one-off templates.
+- Added new families that combine safe factorable body costs with canonical, shifted, scaled, and exponential summation forms.
+- Preserved the theorem-safe workflow: form the sum -> simplify the sum -> determine the type -> evaluate the sum.
