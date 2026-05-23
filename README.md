@@ -1,18 +1,14 @@
 # Asymptotic Runtime Trainer
 
+## New in this update
+- Clean standard step-by-step explanation now uses a single step for summation type determination.
+- Added a button labeled **Full summation type analysis/breakdown** that inserts the formal type-verification steps only when requested.
+- Added more pseudocode variety in loop lower bounds, upper bounds, and summation shapes.
+- Preserved the corrected exponentially-decreasing reasoning by factoring out external multiplicative terms before applying the type theorem.
+
 ## Files
 - index.html
 - styles.css
 - questions.js
 - app.js
-
-## New in this version
-- More variety across levels
-- Independent double nested loops
-- Sequential sections with additive runtime relationships
-- New solution step: **Simplify the sum**
-- Shifted/scaled polynomial summations based on lecture-slide style simplification rules
-- Higher levels (up to 5)
-
-## Deployment
-Upload all files to the root of your GitHub Pages repository, commit, wait for deployment, then hard refresh.
+- README.md

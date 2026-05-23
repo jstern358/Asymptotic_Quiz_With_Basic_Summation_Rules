@@ -112,7 +112,7 @@ select {
   border-radius: 10px;
   padding: 16px 16px 16px 96px;
   overflow-x: auto;
-  min-height: 170px;
+  min-height: 180px;
 }
 
 .code-lines {
@@ -224,8 +224,8 @@ select {
   align-items: center;
 }
 
-#nextBtn {
-  display: none;
+#nextBtn, .detail-btn {
+  display: inline-block;
   padding: 12px 22px;
   font-size: 16px;
   border: none;
@@ -235,7 +235,8 @@ select {
   cursor: pointer;
 }
 
-#nextBtn:hover { background: #1d4ed8; }
+#nextBtn:hover, .detail-btn:hover { background: #1d4ed8; }
+#nextBtn { display: none; }
 
 #explanation {
   display: none;
@@ -291,8 +292,8 @@ select {
   margin-bottom: 10px;
 }
 
-.math-inline {
-  font-family: "Courier New", monospace;
+.detail-wrap {
+  margin: 12px 0 16px;
 }
 
 .muted { color: #6b7280; }

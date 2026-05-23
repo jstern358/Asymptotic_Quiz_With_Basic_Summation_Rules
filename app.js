@@ -4,7 +4,8 @@
     current: null,
     answered: false,
     deckByLevel: {},
-    recentNamesByLevel: { 1: [], 2: [], 3: [], 4: [], 5: [] }
+    recentNamesByLevel: { 1: [], 2: [], 3: [], 4: [], 5: [] },
+    showDetailedType: false
   };
 
   function shuffle(arr) {
@@ -159,13 +160,41 @@
     `;
   }
 
+  function expandedSteps(explanation) {
+    if (!state.showDetailedType || !explanation.detailedTypeSteps || explanation.detailedTypeSteps.length === 0) {
+      return explanation.steps;
+    }
+
+    const insertAfterIndex = explanation.steps.findIndex(step => step.title === 'Determine the summation type');
+    if (insertAfterIndex === -1) {
+      return [...explanation.steps, ...explanation.detailedTypeSteps];
+    }
+
+    return [
+      ...explanation.steps.slice(0, insertAfterIndex + 1),
+      ...explanation.detailedTypeSteps,
+      ...explanation.steps.slice(insertAfterIndex + 1)
+    ];
+  }
+
   function renderSteps(explanation) {
-    return explanation.steps.map((step, idx) => `
+    return expandedSteps(explanation).map((step, idx) => `
       <div class="step">
         <h4>Step ${idx + 1}: ${step.title}</h4>
         <div>${step.content}</div>
       </div>
     `).join('');
+  }
+
+  function detailButtonMarkup(explanation) {
+    if (!explanation.detailedTypeSteps || explanation.detailedTypeSteps.length === 0 || state.showDetailedType) {
+      return '';
+    }
+    return `
+      <div class="detail-wrap">
+        <button class="detail-btn" id="detailTypeBtn">Full summation type analysis/breakdown</button>
+      </div>
+    `;
   }
 
   function renderExplanation(question) {
@@ -174,6 +203,7 @@
       <h3>Step-by-Step Explanation</h3>
       <h4>Summary Table</h4>
       ${renderSummaryTable(e.blockSummaries)}
+      ${detailButtonMarkup(e)}
       ${renderSteps(e)}
       <div class="step"><h4>Final Answer</h4><div>${e.finalRuntime}</div></div>
     `;
@@ -196,8 +226,21 @@
     document.getElementById('currentLevelBadge').textContent = 'Level ' + state.current.level;
   }
 
+  function attachDetailButtonIfPresent() {
+    const btn = document.getElementById('detailTypeBtn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      state.showDetailedType = true;
+      const explanation = document.getElementById('explanation');
+      explanation.innerHTML = renderExplanation(state.current);
+      attachDetailButtonIfPresent();
+      typesetMath(explanation);
+    });
+  }
+
   function newQuestion() {
     state.answered = false;
+    state.showDetailedType = false;
     const factory = takeNextTemplateFactory(currentLevel());
     state.current = factory();
 
@@ -236,6 +279,7 @@
     const explanation = document.getElementById('explanation');
     explanation.innerHTML = renderExplanation(state.current);
     explanation.style.display = 'block';
+    attachDetailButtonIfPresent();
     document.getElementById('nextBtn').style.display = 'inline-block';
 
     typesetMath(feedback);
